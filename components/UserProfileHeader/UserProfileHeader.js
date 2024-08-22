@@ -1,0 +1,37 @@
+import React from 'react';
+import { View, Text, Image, StyleSheet } from 'react-native';
+
+const UserProfileHeader = ({ avatarUrl, username, email }) => {
+    return (
+        <View style={styles.header}>
+            <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+            <Text style={styles.username}>{username}</Text>
+            <Text style={styles.email}>{email}</Text>
+        </View>
+    );
+};
+
+export default UserProfileHeader;
+
+const styles = StyleSheet.create({
+    header: {
+        alignItems: 'center',
+        padding: 16,
+        backgroundColor: '#f0f0f0',
+    },
+    avatar: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        marginBottom: 12,
+    },
+    username: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#1877F2',
+    },
+    email: {
+        fontSize: 16,
+        color: '#777',
+    },
+});

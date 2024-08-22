@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "389381926279",
+    "project_id": "travel-firebase-cae3d",
+    "storage_bucket": "travel-firebase-cae3d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:389381926279:android:66f78fa35582213c14b722",
+        "android_client_info": {
+          "package_name": "com.dinhnhat.travelapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAp4S8G5II5eu-I5rzhGupSBBGWlH8xfI0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
