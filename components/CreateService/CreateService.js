@@ -8,6 +8,7 @@ import {
     Platform,
     StyleSheet,
     TouchableOpacity,
+    ActivityIndicator,
 } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import { TouchableRipple } from 'react-native-paper';
@@ -20,6 +21,8 @@ import Input from '../Input';
 import APIS, { endpoint } from '../../configs/APIS';
 import { MyUserContext } from '../../configs/Context';
 import ModalSelectItem from '../ModalSelectItem/ModalSelectItem';
+import Colors from '../../configs/Colors';
+import { FontAwesome } from '@expo/vector-icons';
 
 const CreateService = () => {
     const user = useContext(MyUserContext);
@@ -33,30 +36,56 @@ const CreateService = () => {
     const [discountModalVisible, setDiscountModalVisible] = useState(false);
     const [selectedDiscount, setSelectedDiscount] = useState(null);
 
+    const [provinces, setProvinces] = useState(null);
+    const [provinceModalVisible, setProvinceModalVisible] = useState(false);
+    const [selectedProvince, setSelectedProvince] = useState(null);
+
     const [err, setErr] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const loadServiceTypes = async () => {
+        setLoading(true);
         try {
             let res = await APIS.get(endpoint['serviceTypes']);
             setServiceTypes(res.data);
         } catch (ex) {
             console.error(ex);
+            setLoading(false);
+        } finally {
+            setLoading(false);
         }
     };
 
     const loadDiscounts = async () => {
+        setLoading(true);
         try {
             let res = await APIS.get(endpoint['discounts']);
             setDiscounts(res.data);
         } catch (ex) {
             console.error(ex);
+            setLoading(false);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadProvinces = async () => {
+        setLoading(true);
+        try {
+            let res = await APIS.get(endpoint['provinces']);
+            setProvinces(res.data);
+        } catch (ex) {
+            console.error(ex);
+            setLoading(false);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
         loadDiscounts();
         loadServiceTypes();
+        loadProvinces();
     }, []);
 
     const updateState = (field, value) => {
@@ -73,16 +102,43 @@ const CreateService = () => {
         { placeholder: 'Yêu cầu...', field: 'require', multiline: true, numberOfLines: 4 },
     ];
 
+    const [images, setImages] = useState([]); // Dùng để lưu danh sách ảnh đã chọn
+
     const picker = async () => {
+        if (images.length >= 5) {
+            Alert.alert('Thông báo', 'Bạn chỉ có thể chọn tối đa 5 ảnh.');
+            return;
+        }
+
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert('Travel_App', 'Permissions Denied!');
+            Alert.alert('Travel_App', 'Quyền truy cập bị từ chối!');
         } else {
-            let res = await ImagePicker.launchImageLibraryAsync();
+            let res = await ImagePicker.launchImageLibraryAsync({
+                allowsMultipleSelection: true, // Cho phép chọn nhiều ảnh
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            });
+
             if (!res.canceled) {
-                updateState('image', res.assets[0]);
+                // Lọc ra các ảnh mới chọn
+                const newImages = res.assets.map((asset) => ({ uri: asset.uri }));
+
+                // Tính số ảnh mới sau khi thêm ảnh mới
+                const totalImages = images.length + newImages.length;
+
+                if (totalImages <= 5) {
+                    setImages((prevImages) => [...prevImages, ...newImages]);
+                } else {
+                    Alert.alert('Thông báo', 'Bạn chỉ có thể chọn tối đa 5 ảnh.');
+                }
             }
         }
+    };
+
+    const handleProvinceSelect = (province) => {
+        setSelectedProvince(province);
+        updateState('province', province.id);
+        setProvinceModalVisible(false);
     };
 
     const handleServiceTypeSelect = (type) => {
@@ -97,9 +153,85 @@ const CreateService = () => {
         setDiscountModalVisible(false);
     };
 
+    const handleRemoveImage = (index) => {
+        Alert.alert('Xác nhận xóa', 'Bạn có chắc chắn muốn xóa ảnh này không?', [
+            { text: 'Hủy', style: 'cancel' },
+            {
+                text: 'Xóa',
+                onPress: () => {
+                    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+                },
+            },
+        ]);
+    };
+
+    const handleAddImages = async (serviceId) => {
+        if (images.length === 0) return; // Không làm gì nếu không có ảnh
+
+        setLoading(true);
+        try {
+            for (const [index, img] of images.entries()) {
+                const formData = new FormData();
+                formData.append('path', {
+                    uri: img.uri,
+                    type: 'image/jpeg', // Hoặc 'image/png' tùy vào định dạng ảnh
+                    name: `image_${index}.jpg`, // Tên ảnh, có thể thay đổi tùy ý
+                });
+                formData.append('service', serviceId);
+
+                // Gửi yêu cầu POST để thêm từng ảnh
+                let res = await APIS.post(endpoint['create-image'], formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+
+                if (res.status !== 201) {
+                    Alert.alert('Lỗi', `Thêm ảnh thứ ${index + 1} thất bại`);
+                }
+            }
+            setImages([]);
+        } catch (ex) {
+            console.error(ex);
+            Alert.alert('Lỗi', 'Lỗi thêm ảnh');
+            setLoading(false);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSubmit = async () => {
         setLoading(true);
         try {
+            // Kiểm tra các trường bắt buộc
+            const requiredFields = ['name', 'address', 'price', 'description', 'require'];
+            for (const field of requiredFields) {
+                if (!service[field]) {
+                    Alert.alert('Lỗi', `Vui lòng nhập ${inputFields.find((f) => f.field === field).placeholder}`);
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            if (!selectedProvince) {
+                Alert.alert('Lỗi', 'Vui lòng chọn tỉnh/thành phố');
+                setLoading(false);
+                return;
+            }
+
+            // Kiểm tra serviceTypes, provinces và images
+            if (!selectedServiceType) {
+                Alert.alert('Lỗi', 'Vui lòng chọn loại dịch vụ');
+                setLoading(false);
+                return;
+            }
+
+            if (images.length === 0) {
+                Alert.alert('Lỗi', 'Vui lòng chọn ít nhất một ảnh');
+                setLoading(false);
+                return;
+            }
+
             const formData = new FormData();
 
             // Chuyển đổi giá thành số thực
@@ -114,49 +246,43 @@ const CreateService = () => {
             }
 
             // Thêm tất cả các trường từ service state vào formData
-            // for (const key in service) {
-            //     if (key === 'image') {
-            //         formData.append(key, {
-            //             uri: service[key].uri,
-            //             type: service[key].type,
-            //             name: service[key].name,
-            //         });
-            //     } else {
-            //         formData.append(key, service[key]);
-            //     }
-            // }
-
             for (const key in service) {
-                if (key !== 'image' && key !== 'price') {
+                if (key !== 'price') {
                     formData.append(key, service[key]);
                 }
             }
 
-            // Thêm trường service_provider với giá trị là user.id
-            formData.append('service_provider', user.id);
-            formData.append('image', null);
+            formData.append('provider', user.id);
 
-            console.log(formData);
-
-            // Gửi yêu cầu POST
-            let res = await APIS.post(endpoint['services01'], formData, {
+            // Gửi yêu cầu POST để tạo dịch vụ
+            let res = await APIS.post(endpoint['create-service'], formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
 
             if (res.status === 201) {
+                // Lấy ID của dịch vụ mới tạo
+                const serviceId = res.data.id;
+
+                // Xử lý ảnh sau khi tạo dịch vụ thành công
+                await handleAddImages(serviceId);
+
                 Alert.alert('Thành công', 'Thêm dịch vụ mới thành công');
                 // Reset lại form hoặc chuyển hướng đến màn hình khác
                 setService({});
+                setSelectedProvince(null);
                 setSelectedServiceType(null);
                 setSelectedDiscount(null);
+                setLoading(false);
             } else {
                 Alert.alert('Lỗi', 'Thêm dịch vụ mới thất bại');
+                setLoading(false);
             }
         } catch (ex) {
             console.error(ex);
             Alert.alert('Lỗi', 'Lỗi hệ thống');
+            setLoading(false);
         } finally {
             setLoading(false);
         }
@@ -175,12 +301,18 @@ const CreateService = () => {
                         <Input
                             key={index}
                             placeholder={input.placeholder}
-                            value={service[input.field]}
+                            value={service[input.field] || ''}
                             onChangeText={(t) => updateState(input.field, t)}
                             multiline={input.multiline}
                             numberOfLines={input.numberOfLines || 1}
                         />
                     ))}
+
+                    <TouchableOpacity style={styles.serviceTypeInput} onPress={() => setProvinceModalVisible(true)}>
+                        <Text style={styles.serviceTypeText}>
+                            {selectedProvince ? selectedProvince.name : 'Chọn tỉnh/thành phố...'}
+                        </Text>
+                    </TouchableOpacity>
 
                     <TouchableOpacity style={styles.serviceTypeInput} onPress={() => setModalVisible(true)}>
                         <Text style={styles.serviceTypeText}>
@@ -190,19 +322,34 @@ const CreateService = () => {
 
                     <TouchableOpacity style={styles.serviceTypeInput} onPress={() => setDiscountModalVisible(true)}>
                         <Text style={styles.serviceTypeText}>
-                            {selectedDiscount ? selectedDiscount.name : 'Chọn giảm giá...'}
+                            {selectedDiscount ? `Giảm ${selectedDiscount.discount}%` : 'Chọn giảm giá...'}
                         </Text>
                     </TouchableOpacity>
 
-                    <TouchableRipple style={styles.imagePicker} onPress={picker}>
-                        <Text style={styles.imagePickerText}>Chọn ảnh</Text>
+                    <TouchableRipple style={styles.serviceTypeInput} onPress={picker}>
+                        <Text style={styles.serviceTypeText}>Chọn ảnh</Text>
                     </TouchableRipple>
-
-                    {service.image && <Image source={{ uri: service.image.uri }} style={styles.image} />}
+                    <ScrollView horizontal style={styles.imagesContainer}>
+                        {images.map((img, index) => (
+                            <View key={index} style={styles.imageWrapper}>
+                                <Image source={{ uri: img.uri }} style={styles.image} />
+                                <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveImage(index)}>
+                                    <FontAwesome name="close" size={16} color="#fff" />
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                    </ScrollView>
                 </ScrollView>
             </KeyboardAvoidingView>
 
             <ButtonFooter onPress={handleSubmit}>Xác nhận</ButtonFooter>
+
+            <ModalSelectItem
+                visible={provinceModalVisible}
+                onClose={() => setProvinceModalVisible(false)}
+                items={provinces}
+                onSelect={handleProvinceSelect}
+            />
 
             <ModalSelectItem
                 visible={modalVisible}
@@ -217,33 +364,19 @@ const CreateService = () => {
                 items={discounts}
                 onSelect={handleDiscountSelect}
             />
+            {loading && (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={Colors.primary} />
+                </View>
+            )}
         </View>
     );
 };
 
-export default CreateService;
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    imagePicker: {
-        padding: 10,
-        marginTop: 20,
-        marginBottom: 12,
-        backgroundColor: '#717273',
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    imagePickerText: {
-        color: '#fff',
-    },
-    image: {
-        width: 200,
-        height: 160,
-        marginTop: 20,
-        marginBottom: 20,
-        alignSelf: 'center',
+        backgroundColor: '#fff',
     },
     serviceTypeInput: {
         padding: 10,
@@ -251,9 +384,46 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         borderWidth: 1,
         borderColor: '#ccc',
-        borderRadius: 8,
+        borderRadius: 4,
     },
     serviceTypeText: {
-        color: '#4E4B66',
+        fontSize: 16,
+        textAlign: 'center',
+        color: '#333',
+    },
+    imagesContainer: {
+        flexDirection: 'row',
+        marginVertical: 10,
+        marginTop: 24,
+    },
+    image: {
+        width: 100,
+        height: 100,
+        marginRight: 10,
+        borderRadius: 6,
+        marginBottom: 50,
+    },
+    removeButton: {
+        position: 'absolute',
+        top: 2,
+        right: 12,
+        backgroundColor: 'red',
+        borderRadius: 12,
+        width: 24,
+        height: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    loadingContainer: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
     },
 });
+
+export default CreateService;

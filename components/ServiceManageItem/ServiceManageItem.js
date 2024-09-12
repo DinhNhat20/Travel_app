@@ -1,5 +1,6 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import React from 'react';
+import Colors from '../../configs/Colors';
 
 const ServiceManageItem = ({ service }) => {
     return (
@@ -58,7 +59,7 @@ const styles = StyleSheet.create({
     },
     serviceName: {
         fontSize: 16,
-        color: '#1877F2',
+        color: Colors.primary,
         fontWeight: 'bold',
     },
     serviceLocation: {
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
         color: '#777',
     },
     serviceLink: {
-        color: '#EE4D2D',
+        color: Colors.secondary,
     },
     serviceRating: {
         fontSize: 14,
@@ -91,10 +92,10 @@ const styles = StyleSheet.create({
         height: 48, // Chiều cao của nút
         marginHorizontal: 10, // Khoảng cách giữa các nút (tùy chọn)
         borderRadius: 8, // Bo góc nút
-        backgroundColor: '#EE4D2D',
+        backgroundColor: Colors.secondary,
     },
     textColor: {
         fontSize: 12,
-        color: '#fff',
+        color: Colors.white,
     },
 });

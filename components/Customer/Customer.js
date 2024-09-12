@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
     faUser,
@@ -16,6 +16,7 @@ import { authAPI, endpoint } from '../../configs/APIS';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import Button from '../Button';
+import Colors from '../../configs/Colors';
 
 const Customer = () => {
     const navigation = useNavigation();
@@ -50,9 +51,21 @@ const Customer = () => {
         navigation.navigate('UserInfo', { profileOfUser });
     };
 
+    const goToMyService = () => {
+        navigation.navigate('MyService');
+    };
+
+    const goToCart = () => {
+        navigation.navigate('Cart');
+    };
+
+    const goToBookingHistory = () => {
+        navigation.navigate('BookingHistory');
+    };
+
     const menuItems = [
         { icon: faUser, title: 'Thông tin cá nhân', onPress: goToUserInfo },
-        { icon: faHistory, title: 'Lịch sử giao dịch' },
+        { icon: faHistory, title: 'Lịch sử booking', onPress: goToBookingHistory },
         { icon: faQuestionCircle, title: 'Trợ giúp' },
         { icon: faCog, title: 'Cài đặt' },
     ];
@@ -65,14 +78,14 @@ const Customer = () => {
             {/* Body */}
             <View style={styles.body}>
                 <View style={styles.iconRow}>
-                    <View style={styles.flexBox}>
+                    <TouchableOpacity style={styles.flexBox} onPress={goToMyService}>
                         <FontAwesomeIcon icon={faListCheck} size={30} style={styles.icon} />
-                        <Text style={{ color: '#717273' }}>Dịch vụ của bạn</Text>
-                    </View>
-                    <View style={styles.flexBox}>
+                        <Text style={{ color: '#717273' }}>Dịch vụ của tôi</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.flexBox} onPress={goToCart}>
                         <FontAwesomeIcon icon={faCartShopping} size={30} style={styles.icon} />
                         <Text style={{ color: '#717273' }}>Giỏ hàng</Text>
-                    </View>
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.menuItems}>
                     <View style={styles.separator} />
@@ -98,7 +111,7 @@ export default Customer;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
     },
     flexBox: {
         flexDirection: 'column',
@@ -116,7 +129,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     icon: {
-        color: '#EE4D2D',
+        color: Colors.secondary,
     },
     menuItems: {
         marginTop: 16,

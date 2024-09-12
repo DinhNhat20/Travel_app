@@ -2,6 +2,7 @@
 import moment from 'moment';
 import React from 'react';
 import { View, Text, TouchableOpacity, FlatList, Modal, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import Colors from '../../configs/Colors';
 
 const ModalItem = ({ visible, onClose, schedules, onSelect }) => {
     return (
@@ -39,7 +40,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
         borderRadius: 8,
         width: '80%',
         padding: 16,
@@ -47,7 +48,7 @@ const styles = StyleSheet.create({
     modalItem: {
         paddingVertical: 16,
         paddingHorizontal: 20,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
         alignItems: 'center',
     },
     itemSeparator: {
@@ -58,7 +59,7 @@ const styles = StyleSheet.create({
     closeModalText: {
         marginTop: 20,
         fontSize: 16,
-        color: '#1877F2',
+        color: Colors.primary,
         textAlign: 'center',
     },
 });

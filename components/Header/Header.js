@@ -13,6 +13,7 @@ import {
     faPlus,
     onPress,
 } from '@fortawesome/free-solid-svg-icons';
+import Colors from '../../configs/Colors';
 
 library.add(faRightToBracket, faMagnifyingGlass, faChevronDown, faCaretDown, faPlus);
 
@@ -132,7 +133,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         height: 160,
-        backgroundColor: '#1877F2',
+        backgroundColor: Colors.primary,
         marginBottom: 12,
         borderBottomLeftRadius: 24,
         borderBottomRightRadius: 24,
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
         borderRadius: 28,
         paddingHorizontal: 16,
         marginHorizontal: 20,
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 8,
         fontSize: 16,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
         color: '#4E4B66',
         borderRadius: 28,
     },
@@ -178,11 +179,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     filterText: {
-        color: '#fff',
+        color: Colors.white,
         fontSize: 14,
     },
     separator: {
-        color: '#fff',
+        color: Colors.white,
         fontSize: 18,
     },
 });

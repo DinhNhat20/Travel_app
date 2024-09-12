@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faUser, faHistory, faQuestionCircle, faCog, faChartSimple, faStar } from '@fortawesome/free-solid-svg-icons';
 import MenuItem from '../MenuItem/MenuItem';
@@ -9,8 +9,9 @@ import UserProfileHeader from '../UserProfileHeader';
 import { useNavigation } from '@react-navigation/native';
 import { MyDispatcherContext, MyUserContext } from '../../configs/Context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authAPI, endpoint } from '../../configs/APIS';
+import APIS, { authAPI, endpoint } from '../../configs/APIS';
 import Button from '../Button';
+import Colors from '../../configs/Colors';
 
 const Provider = () => {
     const navigation = useNavigation();
@@ -18,6 +19,8 @@ const Provider = () => {
     const dispatch = useContext(MyDispatcherContext);
     const [profileOfUser, setProFileOfUser] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [reviews, setReviews] = useState(null);
+    const [averageStar, setAverageStar] = useState(0);
 
     const loadProfileOfUser = async () => {
         setLoading(true);
@@ -36,13 +39,40 @@ const Provider = () => {
         }
     };
 
+    const loadReviews = async () => {
+        setLoading(true);
+        try {
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).get(endpoint['provider-reviews'](user.id));
+            setReviews(res.data);
+            calculateAverageStar(res.data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // gọi hàm loadCates 1 lần khi nạp các component
     useEffect(() => {
         loadProfileOfUser();
+        loadReviews();
     }, [user.id]);
+
+    const calculateAverageStar = (reviews) => {
+        if (reviews && reviews.length > 0) {
+            const totalStars = reviews.reduce((sum, review) => sum + review.star, 0);
+            const average = totalStars / reviews.length;
+            setAverageStar(average.toFixed(1)); // Round to one decimal place
+        }
+    };
 
     const goToUserInfo = () => {
         navigation.navigate('UserInfo', { profileOfUser });
+    };
+
+    const goToStatistical = () => {
+        navigation.navigate('Statistical');
     };
 
     const menuItems = [
@@ -60,14 +90,17 @@ const Provider = () => {
             {/* Body */}
             <View style={styles.body}>
                 <View style={styles.iconRow}>
-                    <View style={styles.flexBox}>
+                    <TouchableOpacity style={styles.flexBox} onPress={goToStatistical}>
                         <FontAwesomeIcon icon={faChartSimple} size={30} style={styles.icon} />
                         <Text style={MyStyles.textColor}>Thống kê</Text>
-                    </View>
-                    <View style={styles.flexBox}>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.flexBox}>
                         <FontAwesomeIcon icon={faStar} size={30} style={styles.icon} />
-                        <Text style={MyStyles.textColor}>4.5/5(16 đánh giá)</Text>
-                    </View>
+                        <Text style={MyStyles.textColor}>
+                            {averageStar}/5 ({reviews ? reviews.length : 0} đánh giá)
+                        </Text>
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.menuItems}>
                     <View style={styles.separator} />
@@ -93,7 +126,7 @@ export default Provider;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
     },
     flexBox: {
         flexDirection: 'column',
@@ -114,11 +147,11 @@ const styles = StyleSheet.create({
     username: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#1877F2',
+        color: Colors.primary,
     },
     email: {
         fontSize: 16,
-        color: '#777',
+        color: Colors.gray,
     },
     body: {
         flex: 1,
@@ -131,7 +164,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     icon: {
-        color: '#EE4D2D',
+        color: Colors.secondary,
     },
     menuItems: {
         marginTop: 16,

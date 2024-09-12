@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { Provider as PaperProvider } from 'react-native-paper';
 
 import { MyDispatcherContext, MyUserContext } from './configs/Context';
 import { MyUserReducer } from './configs/Reducers';
@@ -30,6 +31,9 @@ import Chat from './components/Chat/Chat';
 import Messenger from './components/Messenger';
 import ChatList from './components/Chat/ChatList';
 import UpdateService from './components/UpdateService';
+import Statistical from './components/Statistical';
+import MyService from './components/MyService';
+import BookingHistory from './components/BookingHistory';
 
 import {
     faHome,
@@ -101,6 +105,9 @@ const MyStack03 = () => {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Customer" component={Customer} options={{ title: 'Customer' }} />
             <Stack.Screen name="UserInfo" component={UserInfo} options={{ title: 'UserInfo' }} />
+            <Stack.Screen name="MyService" component={MyService} options={{ title: 'MyService' }} />
+            <Stack.Screen name="Cart" component={Cart} options={{ title: 'Cart' }} />
+            <Stack.Screen name="BookingHistory" component={BookingHistory} options={{ title: 'BookingHistory' }} />
             <Stack.Screen name="ChangePassword" component={ChangePassword} options={{ title: 'ChangePassword' }} />
         </Stack.Navigator>
     );
@@ -118,6 +125,11 @@ const MyStack04 = () => {
             <Stack.Screen name="CreateService" component={CreateService} options={{ title: 'CreateService' }} />
             <Stack.Screen name="UpdateService" component={UpdateService} options={{ title: 'UpdateService' }} />
             <Stack.Screen name="ScheduleList" component={ScheduleList} options={{ title: 'ScheduleList' }} />
+            <Stack.Screen
+                name="RegistrationList"
+                component={RegistrationList}
+                options={{ title: 'RegistrationList' }}
+            />
             <Stack.Screen name="CreateSchedule" component={CreateSchedule} options={{ title: 'CreateSchedule' }} />
             <Stack.Screen name="Chat" component={Chat} options={{ title: 'Chat' }} />
         </Stack.Navigator>
@@ -129,6 +141,7 @@ const MyStack05 = () => {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Provider" component={Provider} options={{ title: 'Provider' }} />
             <Stack.Screen name="UserInfo" component={UserInfo} options={{ title: 'UserInfo' }} />
+            <Stack.Screen name="Statistical" component={Statistical} options={{ title: 'Statistical' }} />
             <Stack.Screen name="ChangePassword" component={ChangePassword} options={{ title: 'ChangePassword' }} />
         </Stack.Navigator>
     );
@@ -238,7 +251,9 @@ export default function App() {
         <NavigationContainer>
             <MyUserContext.Provider value={user}>
                 <MyDispatcherContext.Provider value={dispatch}>
-                    <MyTab />
+                    <PaperProvider>
+                        <MyTab />
+                    </PaperProvider>
                 </MyDispatcherContext.Provider>
             </MyUserContext.Provider>
         </NavigationContainer>

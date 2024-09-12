@@ -1,21 +1,23 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import MyStyles from '../../styles/MyStyles';
 import moment from 'moment';
 
-const ScheduleItem = ({ date, max_participants, available }) => {
+const ScheduleItem = ({ date, max_participants, available, onPress }) => {
     return (
-        <View style={[styles.parentContainer, styles.justifyContent]}>
-            <Text style={MyStyles.text01}>Ngày {moment(date).format('DD/MM/YYYY')}</Text>
-            <View style={styles.childrenContainer}>
-                <FontAwesomeIcon icon={faUserGroup} size={24} style={[MyStyles.textColor, styles.icon]} />
-                <Text style={MyStyles.textColor}>
-                    {available}/{max_participants} người
-                </Text>
+        <TouchableOpacity onPress={onPress}>
+            <View style={[styles.parentContainer, styles.justifyContent]}>
+                <Text style={MyStyles.text01}>Ngày {moment(date).format('DD/MM/YYYY')}</Text>
+                <View style={styles.childrenContainer}>
+                    <FontAwesomeIcon icon={faUserGroup} size={24} style={[MyStyles.textColor, styles.icon]} />
+                    <Text style={MyStyles.textColor}>
+                        {available}/{max_participants} người
+                    </Text>
+                </View>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 };
 

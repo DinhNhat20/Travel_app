@@ -7,7 +7,7 @@ import { isCloseToBottom } from '../../configs/Utils';
 import Colors from '../../configs/Colors';
 import HeaderBase from '../HeaderBase/HeaderBase';
 
-const Cart = ({ navigation }) => {
+const MyService = ({ navigation }) => {
     const user = useContext(MyUserContext);
     const [bookings, setBookings] = useState([]);
     const [page, setPage] = useState(1);
@@ -18,7 +18,8 @@ const Cart = ({ navigation }) => {
         if (page > 0) {
             setLoading(true);
             try {
-                const res = await APIS.get(endpoint['customer-bookings-notyetpaid'](user.id, page));
+                const res = await APIS.get(endpoint['customer-bookings'](user.id, page));
+
                 if (res.data.next === null) setPage(0);
                 if (page === 1) setBookings(res.data.results);
                 else
@@ -56,14 +57,14 @@ const Cart = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <HeaderBase>Giỏ hàng</HeaderBase>
+            <HeaderBase>Dịch vụ của tôi</HeaderBase>
             <FlatList
                 data={bookings}
                 keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => <MyServiceItem booking={item} paid={false} onUpdate={loadBooking} />}
+                renderItem={({ item }) => <MyServiceItem booking={item} paid={true} onUpdate={loadBooking} />}
                 ListEmptyComponent={<Text>Không có dữ liệu</Text>}
                 onEndReachedThreshold={0.5}
-                ListFooterComponent={loading && page > 1 && <ActivityIndicator size="large" color={Colors.primary} />}
+                ListFooterComponent={loading && page > 1 && <ActivityIndicator />}
                 refreshControl={
                     <RefreshControl
                         refreshing={loading && page === 1}
@@ -84,7 +85,7 @@ const Cart = ({ navigation }) => {
     );
 };
 
-export default Cart;
+export default MyService;
 
 const styles = StyleSheet.create({
     container: {

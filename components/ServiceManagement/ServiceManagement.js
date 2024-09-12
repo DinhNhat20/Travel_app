@@ -7,6 +7,7 @@ import APIS, { endpoint } from '../../configs/APIS';
 import ServiceItem from '../ServiceItem';
 import { MyUserContext } from '../../configs/Context';
 import { isCloseToBottom } from '../../configs/Utils';
+import Colors from '../../configs/Colors';
 const ServiceManagement = ({ navigation }) => {
     const user = useContext(MyUserContext);
     const [services, setServices] = useState([]);
@@ -56,7 +57,8 @@ const ServiceManagement = ({ navigation }) => {
         return unsubscribe;
     }, [navigation]);
 
-    const loadMore = ({ nativeEvent }) => {
+    const loadMore = (event) => {
+        const { nativeEvent } = event;
         if (!loading && page > 0 && isCloseToBottom(nativeEvent)) {
             setPage(page + 1);
         }
@@ -91,7 +93,6 @@ const ServiceManagement = ({ navigation }) => {
                 renderItem={renderServiceItem}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.serviceList}
-                onEndReached={loadMore}
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={loading && page > 1 && <ActivityIndicator />}
                 refreshControl={
@@ -103,6 +104,7 @@ const ServiceManagement = ({ navigation }) => {
                         }}
                     />
                 }
+                onScroll={loadMore}
             />
         </View>
     );
@@ -123,7 +125,7 @@ const styles = StyleSheet.create({
     selectedItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
         borderRadius: 20,
         padding: 8,
         margin: 6,
@@ -137,6 +139,6 @@ const styles = StyleSheet.create({
     },
     removeItemText: {
         fontSize: 14,
-        color: '#1877F2',
+        color: Colors.primary,
     },
 });

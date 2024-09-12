@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
 import PropTypes from 'prop-types';
+import Colors from '../../configs/Colors';
 
 const Button = ({
     primary = false,
@@ -12,8 +13,8 @@ const Button = ({
     disabled = false,
     small = false,
     large = false,
-    backgroundColor = '#FFFFFF', // Default background color to white
-    textColor = '#1877F2', // Default text color to blue
+    backgroundColor = Colors.white, // Default background color to white
+    textColor = Colors.primary, // Default text color to blue
     children,
     style,
     leftIcon,
@@ -66,7 +67,7 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         padding: 9,
         borderRadius: 4,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: Colors.white,
         borderWidth: 1,
         borderColor: 'transparent',
     },
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     title: {
-        color: '#fff',
+        color: Colors.white,
         marginHorizontal: 8,
     },
     disabled: {
@@ -89,19 +90,19 @@ const styles = StyleSheet.create({
         borderColor: '#DADADA',
     },
     primary: {
-        color: '#FFFFFF',
-        backgroundColor: '#1877F2',
-        borderColor: '#1877F2',
+        color: Colors.white,
+        backgroundColor: Colors.primary,
+        borderColor: Colors.primary,
     },
     secondary: {
-        color: '#FFFFFF',
-        backgroundColor: '#EE4D2D',
-        borderColor: '#EE4D2D',
+        color: Colors.white,
+        backgroundColor: Colors.secondary,
+        borderColor: Colors.secondary,
     },
     white: {
-        color: '#1877F2',
-        backgroundColor: '#fff',
-        borderColor: '#fff',
+        color: Colors.primary,
+        backgroundColor: Colors.white,
+        borderColor: Colors.white,
     },
     outline: {
         color: '#FE2C55',

@@ -16,6 +16,7 @@ import MyStyles from '../../styles/MyStyles';
 import APIS, { endpoint } from '../../configs/APIS';
 import { useNavigation } from '@react-navigation/native';
 import Button from '../Button';
+import Colors from '../../configs/Colors';
 
 const CreateSchedule = ({ route }) => {
     const navigation = useNavigation();
@@ -198,13 +199,13 @@ const styles = StyleSheet.create({
     button: {
         width: 180,
         padding: 12,
-        backgroundColor: '#1877F2',
+        backgroundColor: Colors.primary,
         marginVertical: 16,
         borderRadius: 5,
     },
     buttonText: {
         textAlign: 'center',
-        color: '#fff',
+        color: Colors.white,
         fontSize: 12,
     },
     input: {

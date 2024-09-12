@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
+import Colors from '../../configs/Colors';
 
 const UserProfileHeader = ({ avatarUrl, username, email }) => {
     return (
@@ -28,10 +29,10 @@ const styles = StyleSheet.create({
     username: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#1877F2',
+        color: Colors.primary,
     },
     email: {
         fontSize: 16,
-        color: '#777',
+        color: Colors.gray,
     },
 });

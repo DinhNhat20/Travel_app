@@ -1,6 +1,7 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
+import Colors from '../../configs/Colors';
 
 const formatPrice = (price) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -19,7 +20,7 @@ const ServiceItem = ({ service, footerType }) => {
                 <Text style={styles.serviceName}>{service.name}</Text>
                 <Text style={styles.serviceLocation}>{service.address}</Text>
                 <Text style={styles.servicePrice}>{formatPrice(service.price)} VNĐ</Text>
-                <Text style={styles.serviceRating}>⭐ {service.average_rating}/5</Text>
+                <Text style={styles.serviceRating}>⭐ {service.average_rating.toFixed(1)}/5</Text>
             </View>
         </TouchableOpacity>
     );
@@ -53,19 +54,19 @@ const styles = StyleSheet.create({
     },
     serviceName: {
         fontSize: 16,
-        color: '#1877F2',
+        color: Colors.primary,
         fontWeight: 'bold',
     },
     serviceLocation: {
         fontSize: 14,
-        color: '#777',
+        color: Colors.gray,
     },
     servicePrice: {
         fontSize: 14,
-        color: '#777',
+        color: Colors.gray,
     },
     serviceLink: {
-        color: '#EE4D2D',
+        color: Colors.secondary,
     },
     serviceRating: {
         fontSize: 14,

@@ -10,8 +10,9 @@ import {
     PanResponder,
     Animated,
     Alert,
+    RefreshControl,
 } from 'react-native';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -23,6 +24,8 @@ import APIS, { authAPI, endpoint } from '../../configs/APIS';
 import { MyUserContext } from '../../configs/Context';
 import Button from '../Button';
 import ModalItem from '../ModalItem/ModalItem';
+import ReviewItem from '../ReviewItem';
+import Colors from '../../configs/Colors';
 
 library.add(faMessage, faCalendar, faStar, faMapMarkerAlt, faClock, faUsers);
 
@@ -35,6 +38,8 @@ const ServiceDetails = ({ route }) => {
     const [selectedSchedule, setSelectedSchedule] = useState(null);
     const [quantity, setQuantity] = useState('1');
     const [provider, setProvider] = useState(null);
+    const [page, setPage] = useState(1);
+    const [reviews, setReviews] = useState([]);
 
     const [modalVisible, setModalVisible] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -45,13 +50,15 @@ const ServiceDetails = ({ route }) => {
     const loadProvider = async () => {
         setLoading(true);
         try {
-            let token = await AsyncStorage.getItem('token');
+            if (user) {
+                let token = await AsyncStorage.getItem('token');
 
-            let url = `${endpoint['providers']}?user=${service.provider}`;
+                let url = `${endpoint['providers']}?user=${service.provider}`;
 
-            let res = await authAPI(token).get(url);
+                let res = await authAPI(token).get(url);
 
-            setProvider(res.data[0]);
+                setProvider(res.data[0]);
+            }
         } catch (ex) {
             console.error(ex);
         } finally {
@@ -65,8 +72,9 @@ const ServiceDetails = ({ route }) => {
 
     useEffect(() => {
         const fetchServiceSchedules = async () => {
+            setLoading(true);
             try {
-                let res = await APIS.get(endpoint['service-schedules'](service.id));
+                let res = await APIS.get(endpoint['service-schedules'](service.id) + '&upcoming=true');
                 setServiceSchedule(res.data);
 
                 if (res.data.length > 0) {
@@ -82,6 +90,43 @@ const ServiceDetails = ({ route }) => {
         fetchServiceSchedules();
     }, []);
 
+    const loadReviews = async () => {
+        if (page > 0) {
+            setLoading(true);
+            try {
+                let res = await APIS.get(endpoint['service-reviews'](service.id, page));
+                if (res.data.next === null) setPage(0);
+                if (page === 1) setReviews(res.data.results);
+                else
+                    setReviews((current) => {
+                        return [...current, ...res.data.results];
+                    });
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+    useEffect(() => {
+        loadReviews();
+    }, [service.id, page]);
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            setPage(1);
+            loadReviews();
+        });
+
+        return unsubscribe;
+    }, [navigation]);
+
+    const loadMore = () => {
+        if (!loading && page > 0) {
+            setPage(page + 1);
+        }
+    };
     const panResponder = useRef(
         PanResponder.create({
             onStartShouldSetPanResponder: () => true,
@@ -107,15 +152,15 @@ const ServiceDetails = ({ route }) => {
             style={[
                 styles.indicator,
                 {
-                    backgroundColor: currentImageIndex === index ? '#1877F2' : '#ccc',
+                    backgroundColor: currentImageIndex === index ? Colors.primary : '#ccc',
                 },
             ]}
         />
     );
 
     const formatTime = (timeStr) => {
-        const time = new Date(`1970-01-01T${timeStr}Z`); // Thêm ngày giả định để có thể parse được thời gian
-        return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const [hours, minutes] = timeStr.split(':');
+        return `${hours}:${minutes}`;
     };
 
     // Function to format date as dd/mm/yyyy
@@ -159,8 +204,8 @@ const ServiceDetails = ({ route }) => {
         navigation.navigate('Chat', { chatId: chatId }); // Navigate to ChatBox and pass serviceId
     };
 
-    const goToSheduleList = () => {
-        navigation.navigate('ScheduleList', { serviceId: service.id });
+    const goToScheduleList = () => {
+        navigation.navigate('ScheduleList', { serviceId: service.id, serviceName: service.name });
     };
 
     const goToUpdateService = () => {
@@ -216,6 +261,12 @@ const ServiceDetails = ({ route }) => {
             { cancelable: true },
         );
 
+    const onRefresh = useCallback(() => {
+        setPage(1);
+        loadProvider();
+        loadReviews();
+    }, [loadProvider, loadReviews]);
+
     return (
         <View style={styles.container}>
             {/* Header */}
@@ -228,42 +279,50 @@ const ServiceDetails = ({ route }) => {
                 </View>
             </View>
             {/* Body */}
-            <ScrollView contentContainerStyle={styles.body}>
+            <ScrollView
+                contentContainerStyle={styles.body}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={loading} // Cập nhật trạng thái refreshing theo biến loading
+                        onRefresh={onRefresh} // Đảm bảo phương thức onRefresh được gọi khi kéo màn hình xuống
+                    />
+                }
+            >
                 <View style={styles.nameContainer}>
                     <Text style={styles.serviceName}>{service.name}</Text>
                     <Pressable onPress={goToChatBox}>
-                        <FontAwesomeIcon icon="fa-message" size={24} color="#1877F2" />
+                        <FontAwesomeIcon icon="fa-message" size={24} color={Colors.primary} />
                     </Pressable>
                 </View>
                 <View style={styles.row}>
-                    <FontAwesomeIcon icon="fa-star" size={28} color="#FFD700" />
-                    <Text style={styles.info}>{service.average_rating}/5</Text>
+                    <FontAwesomeIcon icon="fa-star" size={28} color={Colors.star} />
+                    <Text style={styles.info}>{service.average_rating.toFixed(1)}/5</Text>
                 </View>
                 <View style={styles.row}>
-                    <FontAwesomeIcon icon="fa-map-marker-alt" size={24} color="#777" />
+                    <FontAwesomeIcon icon="fa-map-marker-alt" size={24} color={Colors.gray} />
                     <Text style={styles.info}>{service.address}</Text>
                 </View>
 
                 {/* Display loading indicator if data is not fetched yet */}
                 {loading ? (
-                    <ActivityIndicator size="large" color="#1877F2" />
+                    <ActivityIndicator size="large" color={Colors.primary} />
                 ) : selectedSchedule ? (
                     <>
                         <View style={styles.row}>
-                            <FontAwesomeIcon icon="fa-clock" size={24} color="#777" />
+                            <FontAwesomeIcon icon="fa-clock" size={24} color={Colors.gray} />
                             <Text style={styles.info}>
                                 {formatTime(selectedSchedule.start_time)} - {formatTime(selectedSchedule.end_time)}
                             </Text>
                         </View>
                         <View style={styles.row}>
-                            <FontAwesomeIcon icon="fa-users" size={24} color="#777" />
+                            <FontAwesomeIcon icon="fa-users" size={24} color={Colors.gray} />
                             <Text style={styles.info}>
                                 {selectedSchedule.available}/{selectedSchedule.max_participants} người
                             </Text>
                         </View>
                         <View style={styles.nameContainer}>
                             <View style={styles.calendarContainer}>
-                                <FontAwesomeIcon icon="fa-calendar" size={24} color="#777" />
+                                <FontAwesomeIcon icon="fa-calendar" size={24} color={Colors.gray} />
                                 <Text style={styles.info}>{formatDate(selectedSchedule.date)}</Text>
                             </View>
                             <View>
@@ -281,26 +340,58 @@ const ServiceDetails = ({ route }) => {
                     </>
                 ) : (
                     <View style={styles.calendarContainer}>
-                        <FontAwesomeIcon icon="fa-calendar" size={24} color="#777" />
+                        <FontAwesomeIcon icon="fa-calendar" size={24} color={Colors.gray} />
                         <Text style={styles.info}>Chưa có lịch trình</Text>
                     </View>
                 )}
                 <View style={styles.separator} />
-                <Text style={styles.sectionTitle}>Mô tả</Text>
-                <Text style={styles.description}>{service.description}</Text>
+                <Text style={[styles.sectionTitle, { color: Colors.primary }]}>Mô tả</Text>
+                <Text style={styles.text}>{service.description}</Text>
                 <View style={styles.separator} />
-                <Text style={styles.sectionTitle}>Yêu cầu</Text>
-                <Text style={styles.require}>{service.require}</Text>
+                <Text style={[styles.sectionTitle, { color: Colors.primary }]}>Yêu cầu</Text>
+                <Text style={styles.text}>{service.require}</Text>
+
+                <View style={styles.separator} />
+                <View style={[styles.row, { justifyContent: 'space-between' }]}>
+                    <Text style={[styles.sectionTitle, { color: Colors.secondary }]}>Đánh giá</Text>
+                    <View style={styles.row}>
+                        <FontAwesomeIcon icon="fa-star" size={24} color={Colors.star} />
+                        <Text style={styles.info}>
+                            {service.average_rating.toFixed(1)}/5 ({service.total_reviews} đánh giá)
+                        </Text>
+                    </View>
+                </View>
+                {reviews.length > 0 ? (
+                    reviews.map((review, index) => <ReviewItem key={index} review={review} formatDate={formatDate} />)
+                ) : (
+                    <Text style={styles.text}>Chưa có đánh giá nào.</Text>
+                )}
+
+                {/* Nút "Xem Thêm" để tải thêm đánh giá */}
+                {reviews.length > 0 && page > 0 && (
+                    <TouchableOpacity onPress={loadMore} disabled={loading} style={styles.loadMoreButton}>
+                        <Text style={styles.loadMoreText}>{loading ? 'Đang tải...' : 'Xem thêm'}</Text>
+                    </TouchableOpacity>
+                )}
+                {loading && reviews.length > 0 && <ActivityIndicator size="large" color={Colors.primary} />}
             </ScrollView>
 
             {/* Footer */}
             {footerType === 1 ? (
                 <View style={styles.footer}>
                     <View style={styles.priceContainer}>
-                        <Text style={styles.originalPrice}>{formatPrice(service.price)} VNĐ</Text>
-                        <Text style={styles.discountedPrice}>
-                            {formatPrice((service.price * (100 - service.discount.discount)) / 100)} VNĐ
-                        </Text>
+                        {service.discount ? (
+                            // Nếu có discount, hiển thị cả giá gốc và giá đã giảm
+                            <>
+                                <Text style={styles.originalPrice}>{formatPrice(service.price)} VNĐ</Text>
+                                <Text style={styles.discountedPrice}>
+                                    {formatPrice((service.price * (100 - service.discount.discount)) / 100)} VNĐ
+                                </Text>
+                            </>
+                        ) : (
+                            // Nếu không có discount, chỉ hiển thị giá gốc
+                            <Text style={styles.discountedPrice}>{formatPrice(service.price)} VNĐ</Text>
+                        )}
                     </View>
                     <View style={styles.cartContainer}>
                         <View style={styles.quantitySection}>
@@ -325,7 +416,7 @@ const ServiceDetails = ({ route }) => {
                 </View>
             ) : (
                 <View style={styles.controlContainer}>
-                    <Button secondary onPress={goToSheduleList}>
+                    <Button secondary onPress={goToScheduleList}>
                         Lịch trình
                     </Button>
                     <Button secondary onPress={goToUpdateService}>
@@ -390,23 +481,23 @@ const styles = StyleSheet.create({
         marginVertical: 8,
     },
     serviceName: {
-        color: '#1877F2',
+        color: Colors.primary,
         fontSize: 24,
         fontWeight: 'bold',
     },
     info: {
         fontSize: 16,
-        color: '#777',
+        color: Colors.gray,
         marginLeft: 8, // Space between icon and text
     },
     dateButton: {
-        backgroundColor: '#1877F2',
+        backgroundColor: Colors.primary,
         padding: 10,
         borderRadius: 8,
         alignItems: 'center',
     },
     dateButtonText: {
-        color: '#fff',
+        color: Colors.white,
         fontSize: 12,
     },
     sectionTitle: {
@@ -414,12 +505,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginVertical: 8,
     },
-    description: {
-        fontSize: 16,
-        color: '#333',
-        marginBottom: 16,
-    },
-    require: {
+    text: {
         fontSize: 16,
         color: '#333',
         marginBottom: 16,
@@ -428,6 +514,36 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: '#ccc',
         marginVertical: 16,
+    },
+    reviewContainer: {
+        marginBottom: 20,
+    },
+    reviewHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 5,
+    },
+    avatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        marginRight: 10,
+    },
+    reviewInfo: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    starRating: {
+        flexDirection: 'row',
+        marginTop: 5,
+    },
+    reviewDate: {
+        fontSize: 12,
+        color: Colors.gray,
+    },
+    reviewContent: {
+        fontSize: 14,
+        color: '#333',
     },
     footer: {
         height: 120,
@@ -453,7 +569,7 @@ const styles = StyleSheet.create({
     },
     discountedPrice: {
         fontSize: 20,
-        color: '#EE4D2D',
+        color: Colors.secondary,
     },
     quantitySection: {
         flexDirection: 'row',
@@ -463,13 +579,13 @@ const styles = StyleSheet.create({
     quantityButton: {
         height: 40,
         justifyContent: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
         paddingHorizontal: 12,
         borderRadius: 5,
     },
     buttonText: {
         fontSize: 18,
-        color: '#EE4D2D',
+        color: Colors.secondary,
     },
     quantityInput: {
         height: 40,
@@ -477,8 +593,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         borderRadius: 5,
         borderWidth: 1,
-        borderColor: '#EE4D2D',
-        backgroundColor: '#fff',
+        borderColor: Colors.secondary,
+        backgroundColor: Colors.white,
         marginHorizontal: 6,
     },
     controlContainer: {
@@ -488,5 +604,14 @@ const styles = StyleSheet.create({
         borderTopColor: '#ccc',
         flexDirection: 'row',
         justifyContent: 'space-around',
+    },
+    loadMoreButton: {
+        marginBottom: 12,
+        alignItems: 'center',
+    },
+    loadMoreText: {
+        color: Colors.primary,
+        fontSize: 14,
+        textDecorationLine: 'underline',
     },
 });

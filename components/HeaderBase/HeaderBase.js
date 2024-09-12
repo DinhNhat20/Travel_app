@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import MyStyles from '../../styles/MyStyles';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import Colors from '../../configs/Colors';
 
 const HeaderBase = ({ children, leftIconName, rightIconName, onPressLeftIcon, onPressRightIcon }) => {
     const leftIcon = leftIconName ? leftIconName : null;
@@ -38,13 +39,13 @@ const styles = StyleSheet.create({
     },
     text: {
         textAlign: 'center',
-        color: '#fff',
+        color: Colors.white,
         fontSize: 16,
         fontWeight: 'bold',
     },
     icon: {
         padding: 16,
         margin: 10,
-        color: '#fff',
+        color: Colors.white,
     },
 });

@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHandHoldingDollar } from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 import { useNavigation } from '@react-navigation/native';
+import Colors from '../../configs/Colors';
 
 const Booking = ({ route }) => {
     const navigation = useNavigation();
@@ -43,7 +44,7 @@ const Booking = ({ route }) => {
 
             <View style={styles.container}>
                 {loading ? (
-                    <ActivityIndicator size="large" color="#1877F2" />
+                    <ActivityIndicator size="large" color={Colors.primary} />
                 ) : (
                     <View>
                         <View>
@@ -53,24 +54,24 @@ const Booking = ({ route }) => {
                                     <Text style={styles.info}>Tên dịch vụ: {service.name}</Text>
                                 </View>
                                 <View style={styles.row}>
-                                    <FontAwesomeIcon icon="fa-map-marker-alt" size={18} color="#777" />
+                                    <FontAwesomeIcon icon="fa-map-marker-alt" size={18} color={Colors.gray} />
                                     <Text style={styles.info}>{service.address}</Text>
                                 </View>
                                 <View style={styles.row}>
-                                    <FontAwesomeIcon icon="fa-calendar" size={18} color="#777" />
+                                    <FontAwesomeIcon icon="fa-calendar" size={18} color={Colors.gray} />
                                     <Text style={styles.info}>
                                         {moment(selectedSchedule.date).format('DD/MM/YYYY')}
                                     </Text>
                                 </View>
                                 <View style={styles.row}>
-                                    <FontAwesomeIcon icon="fa-clock" size={18} color="#777" />
+                                    <FontAwesomeIcon icon="fa-clock" size={18} color={Colors.gray} />
                                     <Text style={styles.info}>
                                         {formatTime(selectedSchedule.start_time)} -{' '}
                                         {formatTime(selectedSchedule.end_time)}
                                     </Text>
                                 </View>
                                 <View style={styles.row}>
-                                    <FontAwesomeIcon icon={faHandHoldingDollar} size={18} color="#777" />
+                                    <FontAwesomeIcon icon={faHandHoldingDollar} size={18} color={Colors.gray} />
                                     <Text style={styles.info}>
                                         {service.discount
                                             ? formatPrice(
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
         marginVertical: 6,
     },
     text1: {
-        color: '#1877F2',
+        color: Colors.primary,
         fontSize: 14,
         fontWeight: 'bold',
     },

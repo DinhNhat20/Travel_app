@@ -1,5 +1,6 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React from 'react';
+import Colors from '../../configs/Colors';
 
 const ButtonFooter = ({ children, primary, secondary, onPress }) => {
     const buttonStyles = [primary && styles.primary, secondary && styles.secondary];
@@ -15,7 +16,7 @@ export default ButtonFooter;
 const styles = StyleSheet.create({
     footer: {
         padding: 14,
-        backgroundColor: '#1877F2',
+        backgroundColor: Colors.primary,
         alignItems: 'center',
         justifyContent: 'center',
         position: 'absolute',
@@ -23,13 +24,13 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     logoutText: {
-        color: '#fff',
+        color: Colors.white,
         fontSize: 16,
     },
     primary: {
-        backgroundColor: '#1877F2',
+        backgroundColor: Colors.primary,
     },
     secondary: {
-        backgroundColor: '#EE4D2D',
+        backgroundColor: Colors.secondary,
     },
 });

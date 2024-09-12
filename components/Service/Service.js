@@ -14,6 +14,7 @@ import Header from '../Header';
 import ServiceItem from '../ServiceItem';
 import APIS, { endpoint } from '../../configs/APIS';
 import { isCloseToBottom } from '../../configs/Utils';
+import Colors from '../../configs/Colors';
 
 const Service = ({ navigation }) => {
     const [services, setServices] = useState([]);
@@ -102,7 +103,8 @@ const Service = ({ navigation }) => {
         return unsubscribe;
     }, [navigation]);
 
-    const loadMore = ({ nativeEvent }) => {
+    const loadMore = (event) => {
+        const { nativeEvent } = event;
         if (!loading && page > 0 && isCloseToBottom(nativeEvent)) {
             setPage(page + 1);
         }
@@ -201,9 +203,8 @@ const Service = ({ navigation }) => {
                 renderItem={renderServiceItem}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.serviceList}
-                onEndReached={loadMore}
                 onEndReachedThreshold={0.5}
-                ListFooterComponent={loading && page > 1 && <ActivityIndicator />}
+                ListFooterComponent={loading && page > 1 && <ActivityIndicator size="large" color={Colors.primary} />}
                 refreshControl={
                     <RefreshControl
                         refreshing={loading && page === 1}
@@ -213,6 +214,7 @@ const Service = ({ navigation }) => {
                         }}
                     />
                 }
+                onScroll={loadMore} // Bắt sự kiện cuộn để xác định khi đến cuối danh sách
             />
         </View>
     );
@@ -247,6 +249,6 @@ const styles = StyleSheet.create({
     },
     removeItemText: {
         fontSize: 14,
-        color: '#1877F2',
+        color: Colors.primary,
     },
 });

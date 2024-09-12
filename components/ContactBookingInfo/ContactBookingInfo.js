@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authAPI, endpoint } from '../../configs/APIS';
 import Button from '../Button';
 import { useNavigation } from '@react-navigation/native';
+import Colors from '../../configs/Colors';
 
 const ContactBookingInfo = ({ route }) => {
     const { service, quantity, selectedSchedule } = route.params;
@@ -69,7 +70,7 @@ const ContactBookingInfo = ({ route }) => {
 
             <View style={styles.container}>
                 {loading ? (
-                    <ActivityIndicator size="large" color="#1877F2" />
+                    <ActivityIndicator size="large" color={Colors.primary} />
                 ) : (
                     inputFields.map((input, index) => (
                         <Input

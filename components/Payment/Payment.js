@@ -6,6 +6,7 @@ import Button from '../Button';
 import { MyUserContext } from '../../configs/Context';
 import APIS, { endpoint } from '../../configs/APIS';
 import { useNavigation } from '@react-navigation/native';
+import Colors from '../../configs/Colors';
 
 const Payment = ({ route }) => {
     const navigation = useNavigation();
@@ -248,11 +249,11 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#1877F2',
+        color: Colors.primary,
     },
     changeMethodText: {
         fontSize: 12,
-        color: '#1877F2',
+        color: Colors.primary,
         textDecorationLine: 'underline',
     },
     paymentOption: {
@@ -261,10 +262,10 @@ const styles = StyleSheet.create({
         borderColor: '#ccc',
         borderRadius: 8,
         marginVertical: 8,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
     },
     selectedPaymentOption: {
-        borderColor: '#1877F2',
+        borderColor: Colors.primary,
         borderWidth: 2,
     },
     paymentText: {
@@ -275,7 +276,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 8,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
         marginTop: 16,
     },
     selectedMethodText: {

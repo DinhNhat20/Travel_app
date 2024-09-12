@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { TextInput } from 'react-native-paper';
+import Colors from '../../configs/Colors';
 
 const Input = ({
     label,
@@ -24,10 +25,10 @@ const Input = ({
             secureTextEntry={secureTextEntry}
             theme={{
                 colors: {
-                    primary: '#EE4D2D',
+                    primary: Colors.secondary,
                     background: 'transparent', // Màu nền của input
-                    text: '#EE4D2D', // Màu chữ
-                    placeholder: '#EE4D2D', // Màu placeholder
+                    text: Colors.secondary, // Màu chữ
+                    placeholder: Colors.secondary, // Màu placeholder
                 },
             }}
         />
@@ -45,7 +46,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         borderRadius: 8,
         fontSize: 16,
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
     },
     textArea: {
         height: 120, // Adjust the height as needed

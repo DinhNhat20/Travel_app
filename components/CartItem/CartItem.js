@@ -1,5 +1,6 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
 import React, { useState } from 'react';
+import Colors from '../../configs/Colors';
 
 const CartItem = ({ service }) => {
     const [quantity, setQuantity] = useState('1'); // Ensure quantity is treated as a string
@@ -87,12 +88,12 @@ const styles = StyleSheet.create({
     },
     serviceName: {
         fontSize: 16,
-        color: '#1877F2',
+        color: Colors.primary,
         fontWeight: 'bold',
     },
     serviceLocation: {
         fontSize: 14,
-        color: '#777',
+        color: Colors.gray,
     },
     textContainer: {
         flexDirection: 'row',
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
     },
     textPrice: {
         fontSize: 16,
-        color: '#EE4D2D',
+        color: Colors.secondary,
     },
     cartContainer: {
         justifyContent: 'center',
@@ -116,13 +117,13 @@ const styles = StyleSheet.create({
     quantityButton: {
         height: 40,
         justifyContent: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
         paddingHorizontal: 12,
         borderRadius: 5,
     },
     buttonText: {
         fontSize: 18,
-        color: '#EE4D2D',
+        color: Colors.secondary,
     },
     quantityInput: {
         height: 40,
@@ -131,8 +132,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         borderRadius: 5,
         borderWidth: 1,
-        borderColor: '#EE4D2D',
-        backgroundColor: '#fff',
+        borderColor: Colors.secondary,
+        backgroundColor: Colors.white,
         marginHorizontal: 6,
     },
 });
