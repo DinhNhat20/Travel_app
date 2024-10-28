@@ -7,16 +7,18 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
+    Alert,
 } from 'react-native';
 import React, { useState } from 'react';
 import { Calendar } from 'react-native-calendars';
 import DateTimePickerModal from 'react-native-modal-datetime-picker'; // Thêm import này
 import HeaderBase from '../HeaderBase/HeaderBase';
 import MyStyles from '../../styles/MyStyles';
-import APIS, { endpoint } from '../../configs/APIS';
+import APIS, { authAPI, endpoint } from '../../configs/APIS';
 import { useNavigation } from '@react-navigation/native';
 import Button from '../Button';
 import Colors from '../../configs/Colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CreateSchedule = ({ route }) => {
     const navigation = useNavigation();
@@ -44,12 +46,40 @@ const CreateSchedule = ({ route }) => {
         setSelectedDate(newSelectedDate);
     };
 
-    const checkDateConflict = (selectedDate, serviceSchedules) => {
+    const formatTime = (time) => {
+        // Chuyển đổi thời gian thành chuỗi chỉ chứa giờ và phút (HH:MM)
+        return time.slice(0, 5); // Lấy 5 ký tự đầu tiên từ chuỗi thời gian (HH:MM:SS)
+    };
+
+    const checkDateConflict = (selectedDate, serviceSchedules, startTime, endTime) => {
         const selectedDateString = Object.keys(selectedDate)[0];
+
+        // Format start_time và end_time thành dạng HH:MM
+        const formattedStartTime = formatTime(startTime);
+        const formattedEndTime = formatTime(endTime);
+
         return serviceSchedules.some((schedule) => {
-            return schedule.date === selectedDateString;
+            const scheduleStartTime = formatTime(schedule.start_time);
+            const scheduleEndTime = formatTime(schedule.end_time);
+
+            return (
+                schedule.date === selectedDateString &&
+                scheduleStartTime === formattedStartTime &&
+                scheduleEndTime === formattedEndTime
+            );
         });
     };
+
+    // const checkDateConflict = (selectedDate, serviceSchedules, startTime, endTime) => {
+    //     const selectedDateString = Object.keys(selectedDate)[0];
+    //     return serviceSchedules.some((schedule) => {
+    //         return (
+    //             schedule.date === selectedDateString &&
+    //             schedule.start_time === startTime &&
+    //             schedule.end_time === endTime
+    //         );
+    //     });
+    // };
 
     const handleConfirmStartTime = (date) => {
         setStartTime(date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })); // Sử dụng hour12: false cho 24 giờ
@@ -76,7 +106,7 @@ const CreateSchedule = ({ route }) => {
         }
 
         // Kiểm tra ngày đã chọn có bị trùng không
-        const isDateConflict = checkDateConflict(selectedDate, serviceSchedules);
+        const isDateConflict = checkDateConflict(selectedDate, serviceSchedules, startTime, endTime);
         if (isDateConflict) {
             alert('Lịch trình đã tồn tại, hãy chọn một ngày khác.');
             return;
@@ -90,27 +120,26 @@ const CreateSchedule = ({ route }) => {
         formData.append('end_time', endTime);
         formData.append('max_participants', numPeople);
 
-        console.log(formData);
-
         // Gửi yêu cầu đến API
         try {
-            let res = await APIS.post(endpoint['service-schedules01'], formData, {
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).post(endpoint['service-schedules01'], formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
 
             if (res.status === 201) {
-                alert('Lịch trình đã được tạo thành công.');
+                Alert.alert('Thông báo', 'Thêm lịch trình mới thành công');
                 // Có thể chuyển hướng đến trang khác hoặc cập nhật giao diện
                 route.params.onRefresh(); // Gọi callback để tải lại dữ liệu
                 navigation.goBack(); // Quay lại trang trước đó
             } else {
-                alert('Đã xảy ra lỗi khi tạo lịch trình.');
+                Alert.alert('Thông báo', 'Đã xảy ra lỗi khi tạo lịch trình.');
             }
         } catch (error) {
             console.error('Error creating schedule:', error);
-            alert('Đã xảy ra lỗi khi tạo lịch trình.');
+            Alert.alert('Thông báo', 'Đã xảy ra lỗi khi tạo lịch trình.');
         }
     };
 

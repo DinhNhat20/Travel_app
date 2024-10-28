@@ -12,9 +12,10 @@ import React, { useEffect, useState } from 'react';
 
 import Header from '../Header';
 import ServiceItem from '../ServiceItem';
-import APIS, { endpoint } from '../../configs/APIS';
+import APIS, { authAPI, endpoint } from '../../configs/APIS';
 import { isCloseToBottom } from '../../configs/Utils';
 import Colors from '../../configs/Colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Service = ({ navigation }) => {
     const [services, setServices] = useState([]);

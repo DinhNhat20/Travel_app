@@ -14,9 +14,10 @@ import {
 import React, { useContext, useState } from 'react';
 import moment from 'moment';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import APIS, { endpoint } from '../../configs/APIS';
+import APIS, { authAPI, endpoint } from '../../configs/APIS';
 import { MyUserContext } from '../../configs/Context';
 import Colors from '../../configs/Colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MyServiceItem = ({ booking, paid, onUpdate = null }) => {
     const user = useContext(MyUserContext);
@@ -55,7 +56,8 @@ const MyServiceItem = ({ booking, paid, onUpdate = null }) => {
 
             formData.append('active', false);
 
-            let res = await APIS.patch(endpoint['update-booking'](booking.id), formData, {
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).patch(endpoint['update-booking'](booking.id), formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -76,7 +78,8 @@ const MyServiceItem = ({ booking, paid, onUpdate = null }) => {
         formData.append('service', booking.service_id);
 
         try {
-            let res = await APIS.post(endpoint['reviews'], formData, {
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).post(endpoint['reviews'], formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -88,7 +91,7 @@ const MyServiceItem = ({ booking, paid, onUpdate = null }) => {
                 setModalVisible(false);
                 setRating(0);
                 setReviewContent('');
-                if (onUpdate) onUpdate();
+                onUpdate();
             } else {
                 Alert.alert('Đã xảy ra lỗi khi đánh giá dịch vụ.');
             }
@@ -162,7 +165,8 @@ const MyServiceItem = ({ booking, paid, onUpdate = null }) => {
             formData.append('payment_status', true);
             formData.append('payment_method', selectedPaymentMethodObj.name);
 
-            let res = await APIS.patch(endpoint['update-booking'](booking.id), formData, {
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).patch(endpoint['update-booking'](booking.id), formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -191,9 +195,7 @@ const MyServiceItem = ({ booking, paid, onUpdate = null }) => {
         <View style={styles.serviceItem}>
             <Image source={{ uri: booking.service_images[0] }} style={styles.serviceImage} />
             <View style={styles.serviceDetails}>
-                <Text style={styles.serviceName}>
-                    {booking.service_name} - {booking.id}
-                </Text>
+                <Text style={styles.serviceName}>{booking.service_name}</Text>
                 <Text style={styles.text}>{booking.service_address}</Text>
                 <Text style={styles.text}>Ngày: {moment(booking.date).format('DD/MM/YYYY')}</Text>
                 <Text style={styles.text}>

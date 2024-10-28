@@ -7,9 +7,10 @@ import HeaderBase from '../HeaderBase/HeaderBase';
 import ButtonFooter from '../ButtonFooter/ButtonFooter';
 import ScheduleItem from '../ScheduleItem/ScheduleItem';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import APIS, { endpoint } from '../../configs/APIS';
+import APIS, { authAPI, endpoint } from '../../configs/APIS';
 import Button from '../Button';
 import Colors from '../../configs/Colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ScheduleList = ({ route }) => {
     const navigation = useNavigation();
@@ -28,7 +29,8 @@ const ScheduleList = ({ route }) => {
 
     const fetchServiceSchedules = async () => {
         try {
-            let res = await APIS.get(endpoint['service-schedules'](serviceId));
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).get(endpoint['service-schedules'](serviceId));
             setServiceSchedule(res.data);
         } catch (error) {
             console.error(error);
@@ -84,7 +86,8 @@ const ScheduleList = ({ route }) => {
 
     const handleUpdate = async () => {
         try {
-            await APIS.patch(endpoint['update-service-schedule'](selectedItem.id), {
+            const token = await AsyncStorage.getItem('token');
+            await authAPI(token).patch(endpoint['update-service-schedule'](selectedItem.id), {
                 max_participants: maxParticipants,
                 start_time: startTime,
                 end_time: endTime,
@@ -119,7 +122,8 @@ const ScheduleList = ({ route }) => {
 
     const handleDelete = async () => {
         try {
-            await APIS.delete(endpoint['delete-service-schedule'](selectedItem.id));
+            const token = await AsyncStorage.getItem('token');
+            await authAPI(token).delete(endpoint['delete-service-schedule'](selectedItem.id));
             fetchServiceSchedules(); // Tải lại danh sách sau khi xóa
             Alert.alert('Thông báo', 'Xóa thành công', [
                 {

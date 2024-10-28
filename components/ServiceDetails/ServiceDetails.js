@@ -74,7 +74,8 @@ const ServiceDetails = ({ route }) => {
         const fetchServiceSchedules = async () => {
             setLoading(true);
             try {
-                let res = await APIS.get(endpoint['service-schedules'](service.id) + '&upcoming=true');
+                let token = await AsyncStorage.getItem('token');
+                let res = await authAPI(token).get(endpoint['service-schedules'](service.id) + '&upcoming=true');
                 setServiceSchedule(res.data);
 
                 if (res.data.length > 0) {
@@ -94,7 +95,8 @@ const ServiceDetails = ({ route }) => {
         if (page > 0) {
             setLoading(true);
             try {
-                let res = await APIS.get(endpoint['service-reviews'](service.id, page));
+                let token = await AsyncStorage.getItem('token');
+                let res = await authAPI(token).get(endpoint['service-reviews'](service.id, page));
                 if (res.data.next === null) setPage(0);
                 if (page === 1) setReviews(res.data.results);
                 else
@@ -200,8 +202,8 @@ const ServiceDetails = ({ route }) => {
     };
 
     const goToChatBox = () => {
-        const chatId = [user.id, provider.user].sort().join('-');
-        navigation.navigate('Chat', { chatId: chatId }); // Navigate to ChatBox and pass serviceId
+        const user2 = provider.user;
+        navigation.navigate('Chat', { user2: user2 }); // Navigate to ChatBox and pass serviceId
     };
 
     const goToScheduleList = () => {
@@ -213,6 +215,10 @@ const ServiceDetails = ({ route }) => {
     };
 
     const goToContactBookingInfo = () => {
+        if (selectedSchedule.available + Number(quantity) > selectedSchedule.max_participants) {
+            Alert.alert('Thông báo', 'Số lượng đăng ký không hợp lệ, vui lòng chọn lại!');
+            return;
+        }
         if (!user) {
             Alert.alert(
                 'Thông báo',
@@ -236,7 +242,8 @@ const ServiceDetails = ({ route }) => {
 
     const handleDeleteService = async () => {
         try {
-            let res = await APIS.delete(endpoint['services02'](service.id));
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).delete(endpoint['services02'](service.id));
 
             if (res.status === 204) {
                 Alert.alert('Thành công', 'Dịch vụ đã được xóa');
@@ -290,9 +297,11 @@ const ServiceDetails = ({ route }) => {
             >
                 <View style={styles.nameContainer}>
                     <Text style={styles.serviceName}>{service.name}</Text>
-                    <Pressable onPress={goToChatBox}>
-                        <FontAwesomeIcon icon="fa-message" size={24} color={Colors.primary} />
-                    </Pressable>
+                    {user && (
+                        <Pressable onPress={goToChatBox}>
+                            <FontAwesomeIcon icon="fa-message" size={24} color={Colors.primary} />
+                        </Pressable>
+                    )}
                 </View>
                 <View style={styles.row}>
                     <FontAwesomeIcon icon="fa-star" size={28} color={Colors.star} />
@@ -409,9 +418,17 @@ const ServiceDetails = ({ route }) => {
                                 <Text style={styles.buttonText}>+</Text>
                             </TouchableOpacity>
                         </View>
-                        <Button secondary onPress={goToContactBookingInfo}>
-                            Đăng ký ngay
-                        </Button>
+                        {selectedSchedule && (
+                            <View>
+                                {selectedSchedule.available >= selectedSchedule.max_participants ? (
+                                    <Text style={styles.fullScheduleText}>Lịch trình đã hết chỗ</Text>
+                                ) : (
+                                    <Button secondary onPress={goToContactBookingInfo}>
+                                        Đăng ký ngay
+                                    </Button>
+                                )}
+                            </View>
+                        )}
                     </View>
                 </View>
             ) : (

@@ -4,9 +4,10 @@ import HeaderBase from '../HeaderBase/HeaderBase';
 import MyStyles from '../../styles/MyStyles';
 import Button from '../Button';
 import { MyUserContext } from '../../configs/Context';
-import APIS, { endpoint } from '../../configs/APIS';
+import APIS, { authAPI, endpoint } from '../../configs/APIS';
 import { useNavigation } from '@react-navigation/native';
 import Colors from '../../configs/Colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Payment = ({ route }) => {
     const navigation = useNavigation();
@@ -107,7 +108,8 @@ const Payment = ({ route }) => {
 
     const updateServiceSchedule = async (scheduleId, updatedAvailable) => {
         try {
-            await APIS.patch(`service-schedules/${scheduleId}/`, {
+            const token = await AsyncStorage.getItem('token');
+            await authAPI(token).patch(`service-schedules/${scheduleId}/`, {
                 available: updatedAvailable,
             });
         } catch (error) {
@@ -122,6 +124,7 @@ const Payment = ({ route }) => {
 
             const selectedPaymentMethodObj = paymentMethods.find((method) => method.id === selectedPaymentMethod);
 
+            formData.append('active', true);
             formData.append('full_name', paymentData.contactInfo.full_name);
             formData.append('phone', paymentData.contactInfo.phone);
             formData.append('email', paymentData.contactInfo.email);
@@ -135,7 +138,8 @@ const Payment = ({ route }) => {
             formData.append('customer', user.id);
             formData.append('service_schedule', paymentData.selectedSchedule.id);
 
-            let res = await APIS.post(endpoint['booking'], formData, {
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).post(endpoint['booking'], formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

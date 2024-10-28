@@ -4,13 +4,14 @@ import React, { useEffect, useState } from 'react';
 import HeaderBase from '../HeaderBase/HeaderBase';
 import ButtonFooter from '../ButtonFooter/ButtonFooter';
 import RegistrationItem from '../RegistrationItem/RegistrationItem';
-import APIS, { endpoint } from '../../configs/APIS';
+import APIS, { authAPI, endpoint } from '../../configs/APIS';
 import { isCloseToBottom } from '../../configs/Utils';
 import Colors from '../../configs/Colors';
 
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as XLSX from 'xlsx';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RegistrationList = ({ navigation, route }) => {
     const { schedule, serviceName } = route.params;
@@ -23,7 +24,8 @@ const RegistrationList = ({ navigation, route }) => {
         if (page > 0) {
             setLoading(true);
             try {
-                let res = await APIS.get(endpoint['booking-list'](schedule.id, page));
+                let token = await AsyncStorage.getItem('token');
+                let res = await authAPI(token).get(endpoint['booking-list'](schedule.id, page));
 
                 if (res.data.next === null) {
                     setPage(0);
@@ -36,7 +38,6 @@ const RegistrationList = ({ navigation, route }) => {
                     });
             } catch (ex) {
                 console.error(ex);
-                setLoading(false);
             } finally {
                 setLoading(false);
             }
@@ -66,7 +67,8 @@ const RegistrationList = ({ navigation, route }) => {
 
     const handleUpdateBooking = async (register) => {
         try {
-            await APIS.patch(endpoint['update-booking'](register.id), {
+            const token = await AsyncStorage.getItem('token');
+            await authAPI(token).patch(endpoint['update-booking'](register.id), {
                 payment_status: true,
             });
             setPage(1);

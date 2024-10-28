@@ -1,8 +1,19 @@
 // ScheduleModal.js
 import moment from 'moment';
 import React from 'react';
-import { View, Text, TouchableOpacity, FlatList, Modal, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    FlatList,
+    Modal,
+    StyleSheet,
+    TouchableWithoutFeedback,
+    Dimensions,
+} from 'react-native';
 import Colors from '../../configs/Colors';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const ModalItem = ({ visible, onClose, schedules, onSelect }) => {
     return (
@@ -43,6 +54,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.white,
         borderRadius: 8,
         width: '80%',
+        maxHeight: SCREEN_HEIGHT / 2, // Giới hạn chiều cao tối đa là nửa màn hình
         padding: 16,
     },
     modalItem: {

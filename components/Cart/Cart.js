@@ -1,11 +1,12 @@
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import { MyUserContext } from '../../configs/Context';
-import APIS, { endpoint } from '../../configs/APIS';
+import APIS, { authAPI, endpoint } from '../../configs/APIS';
 import MyServiceItem from '../MyServiceItem/MyServiceItem';
 import { isCloseToBottom } from '../../configs/Utils';
 import Colors from '../../configs/Colors';
 import HeaderBase from '../HeaderBase/HeaderBase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Cart = ({ navigation }) => {
     const user = useContext(MyUserContext);
@@ -18,7 +19,8 @@ const Cart = ({ navigation }) => {
         if (page > 0) {
             setLoading(true);
             try {
-                const res = await APIS.get(endpoint['customer-bookings-notyetpaid'](user.id, page));
+                const token = await AsyncStorage.getItem('token');
+                const res = await authAPI(token).get(endpoint['customer-bookings-notyetpaid'](user.id, page));
                 if (res.data.next === null) setPage(0);
                 if (page === 1) setBookings(res.data.results);
                 else
@@ -54,13 +56,18 @@ const Cart = ({ navigation }) => {
         }
     };
 
+    const onUpdate = async () => {
+        setPage(1);
+        loadBooking();
+    };
+
     return (
         <View style={styles.container}>
             <HeaderBase>Giỏ hàng</HeaderBase>
             <FlatList
                 data={bookings}
                 keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => <MyServiceItem booking={item} paid={false} onUpdate={loadBooking} />}
+                renderItem={({ item }) => <MyServiceItem booking={item} paid={false} onUpdate={onUpdate} />}
                 ListEmptyComponent={<Text>Không có dữ liệu</Text>}
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={loading && page > 1 && <ActivityIndicator size="large" color={Colors.primary} />}

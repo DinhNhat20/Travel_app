@@ -3,11 +3,12 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import Header from '../Header';
 import ServiceManageItem from '../ServiceManageItem/ServiceManageItem';
-import APIS, { endpoint } from '../../configs/APIS';
+import APIS, { authAPI, endpoint } from '../../configs/APIS';
 import ServiceItem from '../ServiceItem';
 import { MyUserContext } from '../../configs/Context';
 import { isCloseToBottom } from '../../configs/Utils';
 import Colors from '../../configs/Colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const ServiceManagement = ({ navigation }) => {
     const user = useContext(MyUserContext);
     const [services, setServices] = useState([]);
@@ -91,7 +92,7 @@ const ServiceManagement = ({ navigation }) => {
             <FlatList
                 data={services}
                 renderItem={renderServiceItem}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item, index) => `${item.id}-${index}`}
                 contentContainerStyle={styles.serviceList}
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={loading && page > 1 && <ActivityIndicator />}

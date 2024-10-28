@@ -1,12 +1,14 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://192.168.1.16:8000/';
+const BASE_URL = 'http://192.168.1.8:8000/';
 
 export const endpoint = {
     login: '/o/token/',
     'current-user': '/users/current-user/',
+    register: '/users/',
+    'change-password': '/users/change-password/',
     'create-service': '/services01/',
-    services02: (service_id) => `/services/${service_id}/`,
+    services02: (service_id) => `/services01/${service_id}/`,
     services: (q, service_type, page, province, sort) =>
         `/services/?q=${q}&service_type=${service_type}&page=${page}&province=${province}&sort=${sort}`,
     'services-of-provider': (q, page, provider, sort) =>

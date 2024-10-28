@@ -77,7 +77,7 @@ const MyStack = () => {
 const MyStack01 = () => {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Sign in" component={Login} options={{ title: 'Sign in' }} />
+            <Stack.Screen name="SignIn" component={Login} options={{ title: 'Sign in' }} />
             <Stack.Screen name="Register" component={Register} options={{ title: 'Đăng ký' }} />
         </Stack.Navigator>
     );
@@ -156,6 +156,15 @@ const MyStack06 = () => {
     );
 };
 
+const MyStack07 = () => {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="ChatList" component={ChatList} options={{ title: 'ChatList' }} />
+            <Stack.Screen name="Chat" component={Chat} options={{ title: 'Chat' }} />
+        </Stack.Navigator>
+    );
+};
+
 const Tab = createBottomTabNavigator();
 const MyTab = () => {
     const user = useContext(MyUserContext);
@@ -193,8 +202,8 @@ const MyTab = () => {
                                 }}
                             />
                             <Tab.Screen
-                                name="Chat"
-                                component={ChatList}
+                                name="Chat1"
+                                component={MyStack07}
                                 options={{
                                     title: 'Tin nhắn',
                                     tabBarIcon: () => <FontAwesomeIcon icon="comment-dots" size={24} color="#124f9f" />,

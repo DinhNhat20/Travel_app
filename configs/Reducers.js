@@ -7,4 +7,4 @@ export const MyUserReducer = (current, action) => {
     }
 
     return current;
-}
+}   

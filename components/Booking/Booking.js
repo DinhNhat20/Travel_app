@@ -16,8 +16,8 @@ const Booking = ({ route }) => {
     const [loading, setLoading] = useState(false);
 
     const formatTime = (timeStr) => {
-        const time = new Date(`1970-01-01T${timeStr}Z`); // Thêm ngày giả định để có thể parse được thời gian
-        return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const [hours, minutes] = timeStr.split(':');
+        return `${hours}:${minutes}`;
     };
 
     const formatPrice = (price) => {

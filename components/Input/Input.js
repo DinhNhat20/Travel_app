@@ -8,6 +8,7 @@ const Input = ({
     placeholder,
     value,
     onChangeText,
+    onFocus,
     multiline = false,
     numberOfLines = 1,
     secureTextEntry = false,
@@ -20,6 +21,7 @@ const Input = ({
             placeholder={placeholder}
             value={value}
             onChangeText={onChangeText}
+            onFocus={onFocus}
             multiline={multiline}
             numberOfLines={numberOfLines}
             secureTextEntry={secureTextEntry}

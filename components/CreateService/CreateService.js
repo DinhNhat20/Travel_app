@@ -15,14 +15,15 @@ import { TouchableRipple } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 
 import HeaderBase from '../HeaderBase/HeaderBase';
-import ButtonFooter from '../ButtonFooter/ButtonFooter';
 import MyStyles from '../../styles/MyStyles';
 import Input from '../Input';
-import APIS, { endpoint } from '../../configs/APIS';
+import APIS, { authAPI, endpoint } from '../../configs/APIS';
 import { MyUserContext } from '../../configs/Context';
 import ModalSelectItem from '../ModalSelectItem/ModalSelectItem';
 import Colors from '../../configs/Colors';
 import { FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Button from '../Button';
 
 const CreateService = () => {
     const user = useContext(MyUserContext);
@@ -46,11 +47,11 @@ const CreateService = () => {
     const loadServiceTypes = async () => {
         setLoading(true);
         try {
-            let res = await APIS.get(endpoint['serviceTypes']);
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).get(endpoint['serviceTypes']);
             setServiceTypes(res.data);
         } catch (ex) {
             console.error(ex);
-            setLoading(false);
         } finally {
             setLoading(false);
         }
@@ -59,11 +60,11 @@ const CreateService = () => {
     const loadDiscounts = async () => {
         setLoading(true);
         try {
-            let res = await APIS.get(endpoint['discounts']);
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).get(endpoint['discounts']);
             setDiscounts(res.data);
         } catch (ex) {
             console.error(ex);
-            setLoading(false);
         } finally {
             setLoading(false);
         }
@@ -72,11 +73,11 @@ const CreateService = () => {
     const loadProvinces = async () => {
         setLoading(true);
         try {
-            let res = await APIS.get(endpoint['provinces']);
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).get(endpoint['provinces']);
             setProvinces(res.data);
         } catch (ex) {
             console.error(ex);
-            setLoading(false);
         } finally {
             setLoading(false);
         }
@@ -180,7 +181,8 @@ const CreateService = () => {
                 formData.append('service', serviceId);
 
                 // Gửi yêu cầu POST để thêm từng ảnh
-                let res = await APIS.post(endpoint['create-image'], formData, {
+                let token = await AsyncStorage.getItem('token');
+                let res = await authAPI(token).post(endpoint['create-image'], formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -194,7 +196,6 @@ const CreateService = () => {
         } catch (ex) {
             console.error(ex);
             Alert.alert('Lỗi', 'Lỗi thêm ảnh');
-            setLoading(false);
         } finally {
             setLoading(false);
         }
@@ -255,7 +256,8 @@ const CreateService = () => {
             formData.append('provider', user.id);
 
             // Gửi yêu cầu POST để tạo dịch vụ
-            let res = await APIS.post(endpoint['create-service'], formData, {
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).post(endpoint['create-service'], formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -274,15 +276,12 @@ const CreateService = () => {
                 setSelectedProvince(null);
                 setSelectedServiceType(null);
                 setSelectedDiscount(null);
-                setLoading(false);
             } else {
                 Alert.alert('Lỗi', 'Thêm dịch vụ mới thất bại');
-                setLoading(false);
             }
         } catch (ex) {
             console.error(ex);
             Alert.alert('Lỗi', 'Lỗi hệ thống');
-            setLoading(false);
         } finally {
             setLoading(false);
         }
@@ -342,7 +341,9 @@ const CreateService = () => {
                 </ScrollView>
             </KeyboardAvoidingView>
 
-            <ButtonFooter onPress={handleSubmit}>Xác nhận</ButtonFooter>
+            <Button primary onPress={handleSubmit}>
+                Xác nhận
+            </Button>
 
             <ModalSelectItem
                 visible={provinceModalVisible}

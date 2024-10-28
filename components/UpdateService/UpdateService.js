@@ -18,7 +18,7 @@ import HeaderBase from '../HeaderBase/HeaderBase';
 import ButtonFooter from '../ButtonFooter/ButtonFooter';
 import MyStyles from '../../styles/MyStyles';
 import Input from '../Input';
-import APIS, { endpoint } from '../../configs/APIS';
+import APIS, { authAPI, endpoint } from '../../configs/APIS';
 import { MyUserContext } from '../../configs/Context';
 import ModalSelectItem from '../ModalSelectItem/ModalSelectItem';
 import Button from '../Button';
@@ -53,7 +53,8 @@ const UpdateService = ({ route }) => {
     const loadServiceTypes = async () => {
         setLoading(true);
         try {
-            let res = await APIS.get(endpoint['serviceTypes']);
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).get(endpoint['serviceTypes']);
             setServiceTypes(res.data);
         } catch (ex) {
             console.error(ex);
@@ -65,7 +66,8 @@ const UpdateService = ({ route }) => {
     const loadDiscounts = async () => {
         setLoading(true);
         try {
-            let res = await APIS.get(endpoint['discounts']);
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).get(endpoint['discounts']);
             setDiscounts(res.data);
         } catch (ex) {
             console.error(ex);
@@ -77,7 +79,8 @@ const UpdateService = ({ route }) => {
     const loadProvinces = async () => {
         setLoading(true);
         try {
-            let res = await APIS.get(endpoint['provinces']);
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).get(endpoint['provinces']);
             setProvinces(res.data);
         } catch (ex) {
             console.error(ex);
@@ -89,7 +92,8 @@ const UpdateService = ({ route }) => {
     const loadImages = async () => {
         setLoading(true);
         try {
-            let res = await APIS.get(endpoint['images'](service.id));
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).get(endpoint['images'](service.id));
             setServiceImages(res.data);
         } catch (ex) {
             console.error(ex);
@@ -183,7 +187,8 @@ const UpdateService = ({ route }) => {
     const handleDeleteImage = async (id) => {
         setLoading(true);
         try {
-            let res = await APIS.delete(endpoint['delete-image'](id));
+            let token = await AsyncStorage.getItem('token');
+            let res = await authAPI(token).delete(endpoint['delete-image'](id));
 
             if (res.status === 204) {
                 setServiceImages((prevImages) => prevImages.filter((image) => image.id !== id));
@@ -290,7 +295,8 @@ const UpdateService = ({ route }) => {
                 formData.append('service', service.id);
 
                 // Gửi yêu cầu POST để thêm từng ảnh
-                let res = await APIS.post(endpoint['create-image'], formData, {
+                let token = await AsyncStorage.getItem('token');
+                let res = await authAPI(token).post(endpoint['create-image'], formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -323,6 +329,8 @@ const UpdateService = ({ route }) => {
             formData.append('province', updateService.province || selectedProvince?.id);
             formData.append('service_type', updateService.service_type || selectedServiceType?.id);
             formData.append('discount', updateService.discount || selectedDiscount?.id);
+
+            console.log(formData);
 
             let token = await AsyncStorage.getItem('token');
 
